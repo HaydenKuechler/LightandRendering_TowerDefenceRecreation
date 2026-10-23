@@ -255,10 +255,10 @@ int main()
    // float min_distance = enemy_speed / 60.0f;
 
 
-    float enemy_speed = 250.0f;   // <-- 250 pixels per second
-    float min_distance = enemy_speed / 60.0f;
-    min_distance *= 1.1f;
-    bool at_end = false;
+    //float enemy_speed = 250.0f;   // <-- 250 pixels per second
+    //float min_distance = enemy_speed / 60.0f;
+    //min_distance *= 1.1f;
+    //bool at_end = false;
     // Manual turret creation example
     // turrets.resize(3);
    // turrets[0].cell = { 3,  7  };
@@ -280,8 +280,15 @@ int main()
     InitAudioDevice();
 
     //LoadSounds
-    Sound enemyspawned = LoadSound("./Assets/S_EnemySound.wav");
-    Sound bulletsound = LoadSound("./Assets/S_MetalBulletSound_Light_Rendering.wav");
+    Sound enemyhit = LoadSound("./Assets/audio/S_hitmarker_user3919.wav");
+    Sound bulletsound = LoadSound("./Assets/audio/S_blaster_hotpin.wav");
+    Sound enemydied = LoadSound("./Assets/audio/S_enemyspotted.wav");
+
+
+    //LoadSprites
+    Image ghostdiead = LoadImage("./Assets/sprites/ghost_dead.png");
+    Image ghostalive = LoadImage("./Assets/sprites/ghost_normal.png");
+    Image ghosthit = LoadImage("./Assets/sprites/ghost_moving.png");
 
     auto LoadLevel = [&](int levelNumber)
     {
@@ -366,6 +373,7 @@ int main()
             {
                 enemy_spawn_timer -= ENEMY_SPAWN_RATE;
 
+                
                 Enemy enemy{};
                 enemy.cell= waypoints[0];
                 enemy.position = TileCenter(enemy.cell.row, enemy.cell.col);
@@ -374,7 +382,7 @@ int main()
 
                 enemies.push_back(enemy);
                 enemiesSpawned++;
-                PlaySound(enemyspawned);
+                
             }
         }
       
@@ -385,6 +393,7 @@ int main()
             {
                 enemy.destroy = true;
                 continue;
+                
             }
 
             const Cell targetCell = waypoints[enemy.nextWaypoint];
@@ -419,6 +428,7 @@ int main()
                 {
                     if (enemy.health <= 0.0f)
                         continue;
+                   
 
                     const float distance = Vector2Distance(turret.position, enemy.position);
 
@@ -440,6 +450,7 @@ int main()
                     bullet.direction = Vector2Normalize(Vector2Subtract(turret.target->position, turret.position));
 
                     bullets.push_back(bullet);
+                    PlaySound(bulletsound);
                 }
 
 
@@ -482,7 +493,7 @@ int main()
                     bullet.destroy = true;
 
                     // Do any on-bullet-enemy behaviour here such as playing sounds
-                    PlaySound(bulletsound);
+                    PlaySound(enemyhit);
                     break;
 				}
                
@@ -495,8 +506,11 @@ int main()
         });
 
         std::erase_if(enemies, [](const Enemy& enemy)
+           
         {
+                
                 return enemy.destroy || enemy.health <= 0.0f;
+                
         });
 
         BeginDrawing();
@@ -533,12 +547,14 @@ int main()
         EndDrawing();
     }
 
+
+    //UnloadTexture(ghostdiead);
+    //UnloadTexture(ghosthit);
+    //UnloadTexture(ghostalive);
+    UnloadSound(enemyhit);
     UnloadSound(bulletsound);
-    UnloadSound(enemyspawned);
-    //UnloadSound()
-    //UnloadSound()
-    //UnloadSound()
-    //UnloadSound()
+    UnloadSound(enemydied);
+  
     
 
     CloseAudioDevice();
